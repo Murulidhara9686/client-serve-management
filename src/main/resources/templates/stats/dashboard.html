@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Analytics — ClientServe</title>
+<link rel="stylesheet" th:href="@{/css/app.css}"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app-shell">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-logo"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:#fff"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+    <div class="sidebar-wordmark">Client<span>Serve</span></div>
+  </div>
+  <nav class="sidebar-nav" style="margin-top:20px">
+    <a href="javascript:history.back()" class="nav-link">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      Back
+    </a>
+    <a class="nav-link active">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      Analytics
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <form th:action="@{/logout}" method="post">
+      <button type="submit" class="btn-logout">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        Sign out
+      </button>
+    </form>
+  </div>
+</aside>
+
+<div class="main-content">
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="sidebar-toggle" id="sidebarToggle"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div><div class="topbar-title">Analytics</div><div class="topbar-sub">Platform-wide performance overview</div></div>
+    </div>
+  </header>
+
+  <main class="page-body">
+    <!-- 6 hero stats -->
+    <div class="stat-grid" style="grid-template-columns:repeat(6,1fr);margin-bottom:20px">
+      <div class="stat-card sc-indigo"><div class="sc-value" th:text="${total}">0</div><div class="sc-label">Total</div><div class="sc-bar"></div></div>
+      <div class="stat-card sc-amber"><div class="sc-value" th:text="${pending}">0</div><div class="sc-label">Pending</div><div class="sc-bar"></div></div>
+      <div class="stat-card sc-blue"><div class="sc-value" th:text="${inProgress}">0</div><div class="sc-label">In Progress</div><div class="sc-bar"></div></div>
+      <div class="stat-card sc-green"><div class="sc-value" th:text="${completed}">0</div><div class="sc-label">Completed</div><div class="sc-bar"></div></div>
+      <div class="stat-card sc-red"><div class="sc-value" th:text="${rejected}">0</div><div class="sc-label">Rejected</div><div class="sc-bar"></div></div>
+      <div class="stat-card sc-purple">
+        <div class="sc-value" th:text="${avgRating}">0.0</div>
+        <div class="sc-label">Avg Rating ★</div>
+        <div class="text-xs text-mu mt-1" th:text="${ratedCount+' reviews'}"></div>
+        <div class="sc-bar"></div>
+      </div>
+    </div>
+
+    <!-- Completion ring + progress bars -->
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:18px;margin-bottom:20px">
+      <div class="card" style="padding:24px;display:flex;align-items:center;gap:24px;min-width:300px">
+        <div style="position:relative;width:84px;height:84px;flex-shrink:0">
+          <svg width="84" height="84" viewBox="0 0 84 84" style="transform:rotate(-90deg)">
+            <circle cx="42" cy="42" r="33" fill="none" stroke="#e2e8f0" stroke-width="9"/>
+            <circle cx="42" cy="42" r="33" fill="none" stroke="#6366f1" stroke-width="9" stroke-linecap="round"
+                    stroke-dasharray="207" stroke-dashoffset="207" id="ring"/>
+          </svg>
+          <div id="ringLabel" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--ink)">0%</div>
+        </div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.97rem;margin-bottom:4px">Completion Rate</div>
+          <div class="text-sm text-mu" th:text="${completed+' of '+total+' requests completed'}"></div>
+          <div style="font-size:.84rem;color:#f59e0b;margin-top:5px" th:if="${ratedCount > 0}" th:text="${'★ '+avgRating+' avg ('+ratedCount+' reviews)'}"></div>
+          <div class="text-xs text-mu mt-1" th:if="${ratedCount == 0}">No ratings yet</div>
+        </div>
+      </div>
+      <div class="card" style="padding:22px">
+        <div class="label mb-4">Status Breakdown</div>
+        <div style="display:flex;flex-direction:column;gap:13px">
+          <div><div class="flex justify-between text-sm mb-1"><span>⏳ Pending</span><span class="text-mu" th:text="${pending}"></span></div><div style="height:8px;background:var(--border-2);border-radius:4px;overflow:hidden"><div id="b1" style="height:100%;border-radius:4px;background:linear-gradient(90deg,#f59e0b,#fbbf24);transition:width 1.2s ease"></div></div></div>
+          <div><div class="flex justify-between text-sm mb-1"><span>⚙️ In Progress</span><span class="text-mu" th:text="${inProgress}"></span></div><div style="height:8px;background:var(--border-2);border-radius:4px;overflow:hidden"><div id="b2" style="height:100%;border-radius:4px;background:linear-gradient(90deg,#6366f1,#818cf8);transition:width 1.2s ease"></div></div></div>
+          <div><div class="flex justify-between text-sm mb-1"><span>✅ Completed</span><span class="text-mu" th:text="${completed}"></span></div><div style="height:8px;background:var(--border-2);border-radius:4px;overflow:hidden"><div id="b3" style="height:100%;border-radius:4px;background:linear-gradient(90deg,#10b981,#34d399);transition:width 1.2s ease"></div></div></div>
+          <div><div class="flex justify-between text-sm mb-1"><span>✕ Rejected</span><span class="text-mu" th:text="${rejected}"></span></div><div style="height:8px;background:var(--border-2);border-radius:4px;overflow:hidden"><div id="b4" style="height:100%;border-radius:4px;background:linear-gradient(90deg,#ef4444,#f87171);transition:width 1.2s ease"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px">
+      <div class="card" style="padding:22px">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:3px">Request Status</div>
+        <div class="text-xs text-mu mb-4">Distribution by current status</div>
+        <canvas id="c1" height="220"></canvas>
+      </div>
+      <div class="card" style="padding:22px">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:3px">Team Composition</div>
+        <div class="text-xs text-mu mb-4">Organisation by role</div>
+        <canvas id="c2" height="220"></canvas>
+      </div>
+    </div>
+
+    <!-- Team counts -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+      <div class="card" style="padding:18px;display:flex;align-items:center;gap:14px">
+        <div class="avatar avatar-indigo" style="width:40px;height:40px;font-size:.85rem">🏢</div>
+        <div><div style="font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;color:#6366f1" th:text="${managers}">0</div><div class="text-xs text-mu">Managers</div></div>
+      </div>
+      <div class="card" style="padding:18px;display:flex;align-items:center;gap:14px">
+        <div class="avatar avatar-teal" style="width:40px;height:40px;font-size:.85rem">👥</div>
+        <div><div style="font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;color:#0d9488" th:text="${assistants}">0</div><div class="text-xs text-mu">Assistants</div></div>
+      </div>
+      <div class="card" style="padding:18px;display:flex;align-items:center;gap:14px">
+        <div class="avatar avatar-amber" style="width:40px;height:40px;font-size:.85rem">⚙️</div>
+        <div><div style="font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;color:#d97706" th:text="${employees}">0</div><div class="text-xs text-mu">Employees</div></div>
+      </div>
+      <div class="card" style="padding:18px;display:flex;align-items:center;gap:14px">
+        <div class="avatar avatar-orange" style="width:40px;height:40px;font-size:.85rem">👤</div>
+        <div><div style="font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;color:#f97316" th:text="${customers}">0</div><div class="text-xs text-mu">Customers</div></div>
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+
+<script src="/js/app.js"></script>
+<script th:inline="javascript">
+const p=[[${pending}]],ip=[[${inProgress}]],c=[[${completed}]],r=[[${rejected}]],tot=[[${total}]];
+const mg=[[${managers}]],as=[[${assistants}]],em=[[${employees}]],cu=[[${customers}]];
+const rate = tot>0 ? Math.round(c/tot*100) : 0;
+const circ = 2*Math.PI*33;
+document.getElementById('ring').style.strokeDashoffset = circ-(circ*rate/100);
+document.getElementById('ringLabel').textContent = rate+'%';
+requestAnimationFrame(()=>{
+  if(tot>0){
+    document.getElementById('b1').style.width=(p/tot*100)+'%';
+    document.getElementById('b2').style.width=(ip/tot*100)+'%';
+    document.getElementById('b3').style.width=(c/tot*100)+'%';
+    document.getElementById('b4').style.width=(r/tot*100)+'%';
+  }
+});
+const font={family:'Inter',size:12};
+const leg={position:'bottom',labels:{padding:14,font,usePointStyle:true}};
+new Chart(document.getElementById('c1'),{type:'doughnut',data:{labels:['Pending','In Progress','Completed','Rejected'],datasets:[{data:[p,ip,c,r],backgroundColor:['#fbbf24','#818cf8','#34d399','#f87171'],borderWidth:0,hoverOffset:6}]},options:{cutout:'68%',plugins:{legend:leg}}});
+new Chart(document.getElementById('c2'),{type:'doughnut',data:{labels:['Managers','Assistants','Employees','Customers'],datasets:[{data:[mg,as,em,cu],backgroundColor:['#6366f1','#0d9488','#d97706','#f97316'],borderWidth:0,hoverOffset:6}]},options:{cutout:'68%',plugins:{legend:leg}}});
+</script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Assistant — ClientServe</title>
+<link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<div class="app-shell">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-logo"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:#fff"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+    <div class="sidebar-wordmark">Client<span>Serve</span></div>
+  </div>
+  <div class="sidebar-user">
+    <div class="su-name" th:text="${user.name}"></div>
+    <div class="su-email" th:text="${user.email}"></div>
+    <div class="su-badge">Assistant Manager</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Navigation</div>
+    <a th:href="@{/assistant/dashboard}" class="nav-link active">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      Dashboard
+    </a>
+    <a th:href="@{/stats}" class="nav-link">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      Analytics
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <form th:action="@{/logout}" method="post">
+      <button type="submit" class="btn-logout">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        Sign out
+      </button>
+    </form>
+  </div>
+</aside>
+
+<div class="main-content">
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="sidebar-toggle" id="sidebarToggle"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div><div class="topbar-title">Assistant Dashboard</div><div class="topbar-sub">Delegate tasks to employees and track completion</div></div>
+    </div>
+    <div class="topbar-right">
+      <div style="position:relative">
+        <button class="bell-btn" id="bellBtn">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.437L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="bell-badge" th:if="${unreadCount > 0}" th:text="${unreadCount > 9 ? '9+' : unreadCount}"></span>
+        </button>
+        <div class="notif-panel" id="notifPanel">
+          <div class="np-head"><span class="np-title">Notifications</span>
+            <form th:action="@{/assistant/notifications/mark-read}" method="post" style="display:inline"><button type="submit" class="np-mark">Mark all read</button></form>
+          </div>
+          <div class="np-list">
+            <div th:if="${#lists.isEmpty(notifications)}" class="np-empty">All caught up!</div>
+            <div th:each="n : ${notifications}" class="notif-item" th:classappend="${!n.isRead} ? 'unread' : ''">
+              <div class="ni-icon" th:classappend="'ni-'+${n.type}"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+              <div class="ni-body"><div class="ni-msg" th:text="${n.message}"></div><div class="ni-time" th:text="${#temporals.format(n.createdAt,'dd MMM, HH:mm')}"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="toast toast-ok" th:if="${successMsg}"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span th:text="${successMsg}"></span></div>
+
+  <main class="page-body">
+    <div class="stat-grid">
+      <div class="stat-card sc-indigo"><div class="sc-top"><div class="sc-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div></div><div class="sc-value" th:text="${total}">0</div><div class="sc-label">Assigned to Me</div><div class="sc-bar"></div></div>
+      <div class="stat-card sc-amber"><div class="sc-top"><div class="sc-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div></div><div class="sc-value" th:text="${unassigned}">0</div><div class="sc-label">Needs Employee</div><div class="sc-bar"></div></div>
+      <div class="stat-card sc-blue"><div class="sc-top"><div class="sc-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg></div></div><div class="sc-value" th:text="${inProgress}">0</div><div class="sc-label">In Progress</div><div class="sc-bar"></div></div>
+      <div class="stat-card sc-green"><div class="sc-top"><div class="sc-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div></div><div class="sc-value" th:text="${completed}">0</div><div class="sc-label">Completed</div><div class="sc-bar"></div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:200px 1fr;gap:18px">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="card"><div class="card-body" style="padding:18px;text-align:center">
+          <div class="avatar avatar-teal" style="margin:0 auto 10px" th:text="${#strings.toUpperCase(#strings.substring(user.name,0,1))}">A</div>
+          <div class="font-bold text-sm" th:text="${user.name}"></div><div class="text-xs text-mu mt-1" th:text="${user.email}"></div>
+        </div></div>
+        <div class="card"><div class="card-body" style="padding:16px">
+          <div class="label mb-2">Employees</div>
+          <div th:each="e : ${employees}" class="flex items-center gap-2 mb-2">
+            <div class="avatar avatar-amber" style="width:28px;height:28px;font-size:.65rem;border-radius:7px" th:text="${#strings.toUpperCase(#strings.substring(e.name,0,1))}"></div>
+            <div><div class="text-xs font-semi" th:text="${e.name}"></div><div class="text-xs text-mu" th:text="${e.email}"></div></div>
+          </div>
+          <div th:if="${#lists.isEmpty(employees)}" class="text-xs text-mu">No employees yet</div>
+        </div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left"><div class="card-title">My Assigned Tasks</div><div class="card-sub">Assign to employees — or reassign if needed</div></div>
+          <div class="flex gap-2 items-center flex-wrap">
+            <div class="filter-tabs">
+              <button class="ftab active" onclick="setFilter('ALL',this)">All</button>
+              <button class="ftab" onclick="setFilter('UNASSIGNED',this)">Unassigned</button>
+              <button class="ftab" onclick="setFilter('IN_PROGRESS',this)">Active</button>
+              <button class="ftab" onclick="setFilter('COMPLETED',this)">Done</button>
+            </div>
+            <div class="search-bar"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg><input id="tableSearch" placeholder="Search…" oninput="applyFilter()"/></div>
+          </div>
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(tasks)}"><div class="empty-icon">📭</div><div class="empty-title">No tasks yet</div></div>
+        <div class="table-wrap" th:if="${!#lists.isEmpty(tasks)}">
+          <table class="data-table" id="mainTable">
+            <thead><tr><th>#</th><th>Title</th><th>Priority</th><th>Customer</th><th>Manager Note</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr th:each="task,i : ${tasks}"
+                  th:data-status="${task.status}"
+                  th:data-assigned="${task.assignedEmployee != null ? 'yes' : 'no'}"
+                  th:data-search="${#strings.toLowerCase(task.title+' '+task.customer.name)}">
+                <td class="text-xs text-mu" th:text="${i.index+1}"></td>
+                <td><div class="font-semi truncate" style="max-width:140px" th:text="${task.title}"></div><span class="cat-chip" th:text="${task.category}"></span></td>
+                <td><span class="pri-badge" th:classappend="'pri-'+${task.priority}" th:text="${task.priority}"></span></td>
+                <td class="text-sm" th:text="${task.customer.name}"></td>
+                <td class="text-xs text-mu truncate" style="max-width:120px" th:text="${task.managerNote != null ? task.managerNote : '—'}"></td>
+                <td>
+                  <span class="badge" th:classappend="'badge-'+${task.status}" th:text="${task.status}"></span>
+                  <div class="text-xs text-mu mt-1" th:if="${task.assignedEmployee != null}" th:text="${'→ '+task.assignedEmployee.name}"></div>
+                </td>
+                <td>
+                  <div th:if="${task.assignedEmployee == null}" style="min-width:155px">
+                    <form th:action="@{/assistant/task/assign/{id}(id=${task.id})}" method="post" class="flex gap-1">
+                      <select name="employeeId" class="form-control" style="padding:5px 8px;font-size:.76rem;flex:1" required>
+                        <option value="">Select…</option>
+                        <option th:each="e : ${employees}" th:value="${e.id}" th:text="${e.name}"></option>
+                      </select>
+                      <button type="submit" class="btn btn-success btn-xs">Assign</button>
+                    </form>
+                  </div>
+
+                    <!-- CUSTOMER DOCUMENT -->
+
+                    <a th:if="${task.customerDocumentPath != null}"
+                       th:href="@{/files/customer-document/{id}(id=${task.id})}"
+                       class="btn btn-primary btn-xs"
+                       target="_blank"
+                       style="margin-bottom:6px;display:inline-block">
+
+                        📄 View File
+
+                    </a>
+                  <div th:if="${task.assignedEmployee != null}" style="display:flex;flex-direction:column;gap:4px;min-width:155px">
+                    <span class="badge badge-COMPLETED" style="font-size:.68rem" th:text="${task.assignedEmployee.name}"></span>
+
+                    <form th:if="${task.status.name() != 'COMPLETED'}" th:action="@{/assistant/task/reassign/{id}(id=${task.id})}" method="post" class="flex gap-1">
+                      <select name="employeeId" class="form-control" style="padding:4px 7px;font-size:.73rem;flex:1">
+                        <option value="">Reassign…</option>
+                        <option th:each="e : ${employees}" th:value="${e.id}" th:text="${e.name}"></option>
+                      </select>
+                      <button type="submit" class="btn btn-ghost btn-xs">↺</button>
+                    </form>
+                    <form th:action="@{/assistant/task/comment/{id}(id=${task.id})}" method="post" class="flex gap-1">
+                      <input type="text" name="content" class="form-control" placeholder="Comment…" required style="padding:4px 7px;font-size:.73rem;flex:1"/>
+                      <button type="submit" class="btn btn-ghost btn-xs">💬</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+<script src="/js/app.js"></script>
+<script>initFilterTabs('mainTable');</script>
+</body>
+</html>

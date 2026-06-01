@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+
+    <title>Manager — ClientServe</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- ===================================================== -->
+    <!-- SIDEBAR -->
+    <!-- ===================================================== -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-brand">
+
+            <div class="sidebar-logo">
+                <svg fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor"
+                     stroke-width="2"
+                     style="width:18px;height:18px;color:#fff">
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+            </div>
+
+            <div class="sidebar-wordmark">
+                Client<span>Serve</span>
+            </div>
+
+        </div>
+
+        <div class="sidebar-user">
+
+            <div class="su-name"
+                 th:text="${user.name}">
+            </div>
+
+            <div class="su-email"
+                 th:text="${user.email}">
+            </div>
+
+            <div class="su-badge">
+                Manager
+            </div>
+
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <div class="nav-section-label">
+                Navigation
+            </div>
+
+            <a th:href="@{/manager/dashboard}"
+               class="nav-link active">
+
+                Dashboard
+
+            </a>
+
+            <a th:href="@{/manager/users}"
+               class="nav-link">
+
+                Team
+
+            </a>
+
+            <a th:href="@{/stats}"
+               class="nav-link">
+
+                Analytics
+
+            </a>
+
+        </nav>
+
+        <div class="sidebar-footer">
+
+            <form th:action="@{/logout}" method="post">
+
+                <button type="submit"
+                        class="btn-logout">
+
+                    Sign out
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </aside>
+
+    <!-- ===================================================== -->
+    <!-- MAIN CONTENT -->
+    <!-- ===================================================== -->
+
+    <div class="main-content">
+
+        <!-- ================================================= -->
+        <!-- TOPBAR -->
+        <!-- ================================================= -->
+
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <button class="sidebar-toggle"
+                        id="sidebarToggle">
+
+                    ☰
+
+                </button>
+
+                <div>
+
+                    <div class="topbar-title">
+                        Manager Dashboard
+                    </div>
+
+                    <div class="topbar-sub">
+                        Review customer requests and manage workflow
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="topbar-right">
+
+                <div style="position:relative">
+
+                    <button class="bell-btn"
+                            id="bellBtn">
+
+                        🔔
+
+                        <span class="bell-badge"
+                              th:if="${unreadCount > 0}"
+                              th:text="${unreadCount}">
+                        </span>
+
+                    </button>
+
+                    <!-- NOTIFICATIONS -->
+
+                    <div class="notif-panel"
+                         id="notifPanel">
+
+                        <div class="np-head">
+
+                            <span class="np-title">
+                                Notifications
+                            </span>
+
+                            <form th:action="@{/manager/notifications/mark-read}"
+                                  method="post"
+                                  style="display:inline">
+
+                                <button type="submit"
+                                        class="np-mark">
+
+                                    Mark all read
+
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                        <div class="np-list">
+
+                            <div th:if="${#lists.isEmpty(notifications)}"
+                                 class="np-empty">
+
+                                No notifications.
+
+                            </div>
+
+                            <div th:each="n : ${notifications}"
+                                 class="notif-item">
+
+                                <div class="ni-body">
+
+                                    <div class="ni-msg"
+                                         th:text="${n.message}">
+                                    </div>
+
+                                    <div class="ni-time"
+                                         th:text="${#temporals.format(
+                                         n.createdAt,
+                                         'dd MMM yyyy HH:mm')}">
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+        <!-- ================================================= -->
+        <!-- SUCCESS MESSAGE -->
+        <!-- ================================================= -->
+
+        <div class="toast toast-ok"
+             th:if="${successMsg}">
+
+            <span th:text="${successMsg}">
+            </span>
+
+        </div>
+
+        <!-- ================================================= -->
+        <!-- PAGE BODY -->
+        <!-- ================================================= -->
+
+        <main class="page-body">
+
+            <!-- ============================================= -->
+            <!-- STATS -->
+            <!-- ============================================= -->
+
+            <div class="stat-grid"
+                 style="grid-template-columns:repeat(5,1fr)">
+
+                <div class="stat-card sc-indigo">
+
+                    <div class="sc-value"
+                         th:text="${total}">
+                        0
+                    </div>
+
+                    <div class="sc-label">
+                        Total
+                    </div>
+
+                </div>
+
+                <div class="stat-card sc-amber">
+
+                    <div class="sc-value"
+                         th:text="${pendingApproval}">
+                        0
+                    </div>
+
+                    <div class="sc-label">
+                        Pending Approval
+                    </div>
+
+                </div>
+
+                <div class="stat-card sc-blue">
+
+                    <div class="sc-value"
+                         th:text="${inProgress}">
+                        0
+                    </div>
+
+                    <div class="sc-label">
+                        In Progress
+                    </div>
+
+                </div>
+
+                <div class="stat-card sc-green">
+
+                    <div class="sc-value"
+                         th:text="${completed}">
+                        0
+                    </div>
+
+                    <div class="sc-label">
+                        Completed
+                    </div>
+
+                </div>
+
+                <div class="stat-card sc-red">
+
+                    <div class="sc-value"
+                         th:text="${rejected}">
+                        0
+                    </div>
+
+                    <div class="sc-label">
+                        Rejected
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ============================================= -->
+            <!-- MAIN GRID -->
+            <!-- ============================================= -->
+
+            <div style="display:grid;
+                        grid-template-columns:210px 1fr;
+                        gap:18px">
+
+                <!-- ========================================= -->
+                <!-- LEFT SIDEBAR -->
+                <!-- ========================================= -->
+
+                <div style="display:flex;
+                            flex-direction:column;
+                            gap:14px">
+
+                    <div class="card">
+
+                        <div class="card-body"
+                             style="padding:18px;
+                             text-align:center">
+
+                            <div class="avatar avatar-indigo"
+                                 style="margin:0 auto 10px"
+                                 th:text="${#strings.toUpperCase(
+                                 #strings.substring(user.name,0,1))}">
+                            </div>
+
+                            <div class="font-bold text-sm"
+                                 th:text="${user.name}">
+                            </div>
+
+                            <div class="text-xs text-mu mt-1"
+                                 th:text="${user.email}">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card">
+
+                        <div class="card-body"
+                             style="padding:16px">
+
+                            <div class="label mb-2">
+                                Summary
+                            </div>
+
+                            <div class="mini-stat">
+                                <span>Pending Approval</span>
+                                <strong th:text="${pendingApproval}">
+                                </strong>
+                            </div>
+
+                            <div class="mini-stat">
+                                <span>In Progress</span>
+                                <strong th:text="${inProgress}">
+                                </strong>
+                            </div>
+
+                            <div class="mini-stat">
+                                <span>Completed</span>
+                                <strong th:text="${completed}">
+                                </strong>
+                            </div>
+
+                            <div class="mini-stat">
+                                <span>Rejected</span>
+                                <strong th:text="${rejected}">
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ========================================= -->
+                <!-- REQUEST TABLE -->
+                <!-- ========================================= -->
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div class="card-header-left">
+
+                            <div class="card-title">
+                                All Service Requests
+                            </div>
+
+                            <div class="card-sub">
+                                Approve or reject requests
+                            </div>
+
+                        </div>
+
+                        <!-- FILTERS -->
+
+                        <div class="filter-tabs">
+
+                            <button class="ftab active"
+                                    onclick="setFilter('ALL',this)">
+
+                                All
+
+                            </button>
+
+                            <button class="ftab"
+                                    onclick="setFilter(
+                                    'PENDING_APPROVAL',
+                                    this)">
+
+                                Pending Approval
+
+                            </button>
+
+                            <button class="ftab"
+                                    onclick="setFilter(
+                                    'APPROVED',
+                                    this)">
+
+                                Approved
+
+                            </button>
+
+                            <button class="ftab"
+                                    onclick="setFilter(
+                                    'IN_PROGRESS',
+                                    this)">
+
+                                Active
+
+                            </button>
+
+                            <button class="ftab"
+                                    onclick="setFilter(
+                                    'COMPLETED',
+                                    this)">
+
+                                Completed
+
+                            </button>
+
+                            <button class="ftab"
+                                    onclick="setFilter(
+                                    'REJECTED',
+                                    this)">
+
+                                Rejected
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <!-- EMPTY STATE -->
+
+                    <div class="empty-state"
+                         th:if="${#lists.isEmpty(requests)}">
+
+                        No requests found.
+
+                    </div>
+
+                    <!-- TABLE -->
+
+                    <div class="table-wrap"
+                         th:if="${!#lists.isEmpty(requests)}">
+
+                        <table class="data-table"
+                               id="mainTable">
+
+                            <thead>
+
+                            <tr>
+
+                                <th>#</th>
+                                <th>Request</th>
+                                <th>Category</th>
+                                <th>Priority</th>
+                                <th>Customer</th>
+                                <th>Status</th>
+                                <th>Action</th>
+
+                            </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                            <tr th:each="req,i : ${requests}"
+                                th:data-status="${req.status}">
+
+                                <!-- INDEX -->
+
+                                <td th:text="${i.index+1}">
+                                </td>
+
+                                <!-- REQUEST -->
+
+                                <td>
+
+                                    <div class="font-semi"
+                                         th:text="${req.title}">
+                                    </div>
+
+                                    <div class="text-xs text-mu"
+                                         th:text="${req.description}">
+                                    </div>
+
+                                </td>
+
+                                <!-- CATEGORY -->
+
+                                <td>
+
+                                    <span class="cat-chip"
+                                          th:text="${req.category}">
+                                    </span>
+
+                                </td>
+
+                                <!-- PRIORITY -->
+
+                                <td>
+
+                                    <span class="pri-badge"
+                                          th:text="${req.priority}">
+                                    </span>
+
+                                </td>
+
+                                <!-- CUSTOMER -->
+
+                                <td th:text="${req.customer.name}">
+                                </td>
+
+                                <!-- STATUS -->
+
+                                <td>
+
+                                    <span class="badge"
+                                          th:classappend="
+                                          ${req.status.name() == 'PENDING_APPROVAL'} ? 'badge-PENDING' :
+                                          (${req.status.name() == 'APPROVED'} ? 'badge-COMPLETED' :
+                                          (${req.status.name() == 'REJECTED'} ? 'badge-REJECTED' :
+                                          (${req.status.name() == 'IN_PROGRESS'} ? 'badge-IN_PROGRESS' :
+                                          'badge-COMPLETED')))"
+                                          th:text="${req.status}">
+                                    </span>
+
+                                    <div class="text-xs text-mu mt-1"
+                                         th:if="${req.managerNote != null}"
+                                         th:text="${req.managerNote}">
+                                    </div>
+
+                                    <div class="text-xs text-mu mt-1"
+                                         th:if="${req.reviewedBy != null}">
+
+                                        Reviewed By:
+                                        <span th:text="${req.reviewedBy.name}">
+                                        </span>
+
+                                    </div>
+
+                                    <div class="text-xs text-mu"
+                                         th:if="${req.reviewedAt != null}">
+
+                                        <span th:text="${#temporals.format(
+                                        req.reviewedAt,
+                                        'dd MMM yyyy hh:mm a')}">
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <!-- ACTION -->
+
+                                <td>
+                                    <!-- CUSTOMER DOCUMENT -->
+
+                                    <a th:if="${req.customerDocumentPath != null}"
+                                       th:href="@{/files/customer-document/{id}(id=${req.id})}"
+                                       class="btn btn-primary btn-xs"
+                                       target="_blank"
+                                       style="margin-bottom:6px;display:inline-block">
+
+                                        📄 View File
+
+                                    </a>
+
+                                    <!-- PENDING APPROVAL -->
+
+                                    <div th:if="${req.status.name()
+                                    =='PENDING_APPROVAL'}"
+
+                                         style="display:flex;
+                                         flex-direction:column;
+                                         gap:5px;
+                                         min-width:190px">
+
+                                        <!-- APPROVE -->
+
+                                        <form th:action=
+                                                      "@{/manager/request/approve/{id}
+                                        (id=${req.id})}"
+
+                                              method="post">
+
+                                            <div class="flex gap-1 mb-1">
+
+                                                <select name="assistantId"
+                                                        class="form-control"
+                                                        required>
+
+                                                    <option value="">
+                                                        Assign Assistant
+                                                    </option>
+
+                                                    <option th:each="a :
+                                                    ${assistants}"
+
+                                                            th:value="${a.id}"
+
+                                                            th:text="${a.name}">
+                                                    </option>
+
+                                                </select>
+
+                                                <button type="submit"
+                                                        class="btn btn-success btn-xs">
+
+                                                    ✓
+
+                                                </button>
+
+                                            </div>
+
+                                            <textarea name="managerNote"
+                                                      class="form-control"
+                                                      rows="2"
+                                                      placeholder="Approval note...">
+                                            </textarea>
+
+                                        </form>
+
+                                        <!-- REJECT -->
+
+                                        <form th:action=
+                                                      "@{/manager/request/reject/{id}
+                                        (id=${req.id})}"
+
+                                              method="post"
+
+                                              onsubmit=
+                                                      "return confirm(
+                                              'Reject this request?')">
+
+                                            <div class="flex gap-1">
+
+                                                <input type="text"
+                                                       name="reason"
+                                                       class="form-control"
+                                                       placeholder=
+                                                               "Rejection reason..."
+                                                       required/>
+
+                                                <button type="submit"
+                                                        class="btn btn-danger btn-xs">
+
+                                                    ✕
+
+                                                </button>
+
+                                            </div>
+
+                                        </form>
+
+                                    </div>
+
+                                    <!-- APPROVED / ACTIVE -->
+
+                                    <div th:if="${req.status.name()
+                                    =='APPROVED'
+                                    or req.status.name()
+                                    =='IN_PROGRESS'
+                                    or req.status.name()
+                                    =='COMPLETED'}"
+
+                                         style="display:flex;
+                                         flex-direction:column;
+                                         gap:5px">
+
+                                        <span class="badge badge-COMPLETED"
+
+                                              th:text=
+                                                      "${'Assigned → '
+                                              +(req.assignedAssistant!=null
+                                              ? req.assignedAssistant.name
+                                              : 'Assistant')}">
+                                        </span>
+
+                                        <form th:action=
+                                                      "@{/manager/request/comment/{id}
+                                        (id=${req.id})}"
+
+                                              method="post"
+
+                                              class="flex gap-1">
+
+                                            <input type="text"
+                                                   name="content"
+                                                   class="form-control"
+                                                   placeholder=
+                                                           "Add comment..."
+                                                   required/>
+
+                                            <button type="submit"
+                                                    class="btn btn-ghost btn-xs">
+
+                                                💬
+
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                    <!-- REJECTED -->
+
+                                    <div th:if="${req.status.name()
+                                    =='REJECTED'}">
+
+                                        <span class="badge badge-REJECTED">
+
+                                            Rejected
+
+                                        </span>
+
+                                        <div class="text-xs text-mu mt-1"
+                                             th:if="${req.rejectionReason != null}"
+
+                                             th:text="${req.rejectionReason}">
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+</div>
+
+<script src="/js/app.js"></script>
+
+<script>
+    initFilterTabs('mainTable');
+</script>
+
+</body>
+</html>

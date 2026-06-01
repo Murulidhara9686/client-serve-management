@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Error — ClientServe</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0f172a;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#fff;border-radius:22px;padding:52px 44px;max-width:500px;width:100%;text-align:center;box-shadow:0 40px 80px rgba(0,0,0,.5)}
+.icon{font-size:3rem;margin-bottom:14px}
+.title{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:#0f172a;margin-bottom:6px}
+.code{font-size:.8rem;color:#94a3b8;margin-bottom:10px;font-family:monospace}
+.msg{color:#64748b;font-size:.9rem;margin-bottom:20px;line-height:1.65}
+.detail{font-size:.75rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;margin-bottom:20px;text-align:left;word-break:break-word;color:#94a3b8;line-height:1.5}
+.btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-block;padding:10px 22px;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;transition:all .18s;text-decoration:none}
+.btn-p{background:#6366f1;color:#fff}.btn-p:hover{background:#4f46e5}
+.btn-g{background:#f1f5f9;color:#0f172a}.btn-g:hover{background:#e2e8f0}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">⚠️</div>
+  <div class="title" th:text="${errorTitle ?: 'Something went wrong'}">Error</div>
+  <div class="code">Error <span th:text="${status ?: 500}">500</span> — <span th:text="${error ?: 'Internal Server Error'}">Internal Server Error</span></div>
+  <div class="msg" th:text="${errorMessage ?: (message ?: 'An unexpected error occurred. Please try again.')}">An error occurred.</div>
+  <div class="detail" th:if="${errorDetail}" th:text="${errorDetail}"></div>
+  <div class="btns">
+    <a th:href="@{/}" class="btn btn-p">← Back to Login</a>
+    <a href="javascript:history.back()" class="btn btn-g">Go Back</a>
+  </div>
+</div>
+</body>
+</html>

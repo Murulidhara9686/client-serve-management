@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8"/>
+
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1"/>
+
+    <title>ClientServe — Register</title>
+
+    <link href=
+                  "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@700;800&display=swap"
+          rel="stylesheet"/>
+
+    <style>
+
+        /* =========================================================
+           RESET
+        ========================================================= */
+
+        *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box
+        }
+
+        /* =========================================================
+           BODY
+        ========================================================= */
+
+        body{
+
+        font-family:'Inter',sans-serif;
+
+        background:
+        linear-gradient(
+        135deg,
+        #0f172a 0%,
+        #111827 25%,
+        #312e81 65%,
+        #4f46e5 100%
+        );
+
+        min-height:100vh;
+
+        display:flex;
+        flex-direction:column;
+
+        align-items:center;
+        justify-content:center;
+
+        padding:28px 16px;
+
+        overflow:hidden;
+        position:relative;
+        }
+
+        /* =========================================================
+           GLOW EFFECTS
+        ========================================================= */
+
+        body::before,
+        body::after{
+
+        content:'';
+
+        position:fixed;
+
+        width:420px;
+        height:420px;
+
+        border-radius:50%;
+
+        filter:blur(90px);
+
+        opacity:.22;
+
+        z-index:0;
+        }
+
+        body::before{
+
+        background:#6366f1;
+
+        top:-120px;
+        left:-120px;
+        }
+
+        body::after{
+
+        background:#f97316;
+
+        bottom:-120px;
+        right:-120px;
+        }
+
+        /* =========================================================
+           LOGO
+        ========================================================= */
+
+        .logo-row{
+
+        display:flex;
+        align-items:center;
+
+        gap:10px;
+
+        margin-bottom:28px;
+
+        position:relative;
+        z-index:1;
+        }
+
+        .logo-box{
+
+        width:42px;
+        height:42px;
+
+        background:
+        linear-gradient(
+        135deg,
+        #6366f1,
+        #818cf8
+        );
+
+        border-radius:12px;
+
+        display:flex;
+        align-items:center;
+        justify-content:center;
+
+        box-shadow:
+        0 8px 24px rgba(99,102,241,.35);
+        }
+
+        .logo-box svg{
+
+        width:20px;
+        height:20px;
+
+        color:#fff;
+        }
+
+        .wordmark{
+
+        font-family:'Syne',sans-serif;
+
+        font-size:1.3rem;
+
+        font-weight:800;
+
+        color:#fff;
+
+        letter-spacing:-.03em;
+        }
+
+        .wordmark span{
+
+        color:#f97316;
+        }
+
+        /* =========================================================
+           CARD
+        ========================================================= */
+
+        .card{
+
+        position:relative;
+        z-index:1;
+
+        background:
+        rgba(255,255,255,.92);
+
+        backdrop-filter:blur(16px);
+
+        -webkit-backdrop-filter:blur(16px);
+
+        border-radius:24px;
+
+        border:1px solid
+        rgba(255,255,255,.18);
+
+        padding:38px;
+
+        width:100%;
+        max-width:520px;
+
+        box-shadow:
+        0 20px 60px rgba(0,0,0,.30);
+        }
+
+        /* =========================================================
+           TITLES
+        ========================================================= */
+
+        .card-title{
+
+        font-family:'Syne',sans-serif;
+
+        font-size:2rem;
+
+        font-weight:800;
+
+        color:#0f172a;
+
+        letter-spacing:-.05em;
+
+        margin-bottom:4px;
+        }
+
+        .card-sub{
+
+        font-size:.92rem;
+
+        color:#64748b;
+
+        margin-bottom:28px;
+        }
+
+        /* =========================================================
+           ALERT
+        ========================================================= */
+
+        .alert{
+
+        padding:11px 14px;
+
+        border-radius:10px;
+
+        font-size:.82rem;
+
+        font-weight:500;
+
+        margin-bottom:18px;
+
+        border:1px solid #fecaca;
+
+        background:#fef2f2;
+
+        color:#991b1b;
+        }
+
+        /* =========================================================
+           FORM LABELS
+        ========================================================= */
+
+        .fl{
+
+        font-size:.78rem;
+
+        font-weight:700;
+
+        color:#334155;
+
+        display:block;
+
+        margin-bottom:6px;
+        }
+
+        /* =========================================================
+           INPUTS
+        ========================================================= */
+
+        .fi{
+
+        width:100%;
+
+        padding:11px 14px;
+
+        border:1.5px solid #e2e8f0;
+
+        border-radius:11px;
+
+        font-family:'Inter',sans-serif;
+
+        font-size:.90rem;
+
+        color:#0f172a;
+
+        outline:none;
+
+        background:#f8fafc;
+
+        transition:all .18s;
+        }
+
+        .fi:focus{
+
+        border-color:#6366f1;
+
+        background:#fff;
+
+        box-shadow:
+        0 0 0 4px #e0e7ff;
+        }
+
+        .fg{
+
+        margin-bottom:16px;
+        }
+
+        .fr2{
+
+        display:grid;
+
+        grid-template-columns:1fr 1fr;
+
+        gap:12px;
+        }
+
+        /* =========================================================
+           PASSWORD
+        ========================================================= */
+
+        .pw-wrap{
+
+        position:relative;
+        }
+
+        .pw-wrap .fi{
+
+        padding-right:42px;
+        }
+
+        .pw-eye{
+
+        position:absolute;
+
+        right:12px;
+        top:50%;
+
+        transform:translateY(-50%);
+
+        background:none;
+
+        border:none;
+
+        cursor:pointer;
+
+        color:#94a3b8;
+        }
+
+        .pw-eye svg{
+
+        width:17px;
+        height:17px;
+        }
+
+        /* =========================================================
+           PASSWORD STRENGTH
+        ========================================================= */
+
+        .strength-bar{
+
+        height:4px;
+
+        background:#e2e8f0;
+
+        border-radius:999px;
+
+        margin-top:7px;
+
+        overflow:hidden;
+        }
+
+        .strength-fill{
+
+        height:100%;
+
+        border-radius:999px;
+
+        transition:
+        width .3s,
+        background .3s;
+
+        width:0;
+        }
+
+        .strength-hint{
+
+        font-size:.72rem;
+
+        margin-top:4px;
+
+        font-weight:700;
+        }
+
+        /* =========================================================
+           ROLE
+        ========================================================= */
+
+        .role-grid{
+
+        display:grid;
+
+        grid-template-columns:1fr 1fr;
+
+        gap:10px;
+
+        margin-bottom:20px;
+        }
+
+        .role-opt{
+
+        display:none;
+        }
+
+        .role-lbl{
+
+        display:flex;
+
+        align-items:center;
+
+        gap:10px;
+
+        padding:13px 15px;
+
+        border-radius:12px;
+
+        border:1.5px solid #e2e8f0;
+
+        cursor:pointer;
+
+        font-size:.88rem;
+
+        font-weight:600;
+
+        color:#334155;
+
+        transition:all .18s;
+
+        background:#f8fafc;
+        }
+
+        .role-lbl:hover{
+
+        border-color:#6366f1;
+
+        color:#6366f1;
+        }
+
+        .role-opt:checked + .role-lbl{
+
+        border-color:#6366f1;
+
+        background:#eef2ff;
+
+        color:#4f46e5;
+
+        font-weight:700;
+        }
+
+        .role-lbl svg{
+
+        width:18px;
+        height:18px;
+        }
+
+        /* =========================================================
+           BUTTON
+        ========================================================= */
+
+        .bsub{
+
+        width:100%;
+
+        padding:14px;
+
+        background:
+        linear-gradient(
+        135deg,
+        #111827,
+        #312e81
+        );
+
+        border:none;
+
+        border-radius:12px;
+
+        color:#fff;
+
+        font-family:'Syne',sans-serif;
+
+        font-size:1rem;
+
+        font-weight:700;
+
+        cursor:pointer;
+
+        transition:all .22s;
+
+        margin-top:8px;
+        }
+
+        .bsub:hover{
+
+        transform:translateY(-2px);
+
+        background:
+        linear-gradient(
+        135deg,
+        #312e81,
+        #4f46e5
+        );
+
+        box-shadow:
+        0 10px 24px rgba(99,102,241,.35);
+        }
+
+        /* =========================================================
+           LOGIN
+        ========================================================= */
+
+        .login-row{
+
+        text-align:center;
+
+        font-size:.84rem;
+
+        color:#64748b;
+
+        margin-top:18px;
+        }
+
+        .login-row a{
+
+        color:#4f46e5;
+
+        font-weight:700;
+
+        text-decoration:none;
+        }
+
+        /* =========================================================
+           ERROR TEXT
+        ========================================================= */
+
+        .err{
+
+        font-size:.72rem;
+
+        font-weight:600;
+
+        margin-top:5px;
+
+        color:#dc2626;
+
+        display:none;
+        }
+
+        /* =========================================================
+           MOBILE
+        ========================================================= */
+
+        @media(max-width:640px){
+
+        .card{
+
+        padding:28px 22px;
+        }
+
+        .fr2{
+
+        grid-template-columns:1fr;
+        }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="logo-row">
+
+    <div class="logo-box">
+
+        <svg fill="none"
+             viewBox="0 0 24 24"
+             stroke="currentColor"
+             stroke-width="2">
+
+            <path stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"/>
+
+        </svg>
+
+    </div>
+
+    <div class="wordmark">
+
+        Client<span>Serve</span>
+
+    </div>
+
+</div>
+
+<div class="card">
+
+    <div class="card-title">
+
+        Create your account
+
+    </div>
+
+    <div class="card-sub">
+
+        Join ClientServe and start managing service requests.
+
+    </div>
+
+    <div th:if="${error}"
+         class="alert"
+         th:text="${error}">
+    </div>
+
+    <form th:action="@{/register}"
+          method="post"
+          th:object="${user}"
+
+          onsubmit="return validateForm()">
+
+        <!-- NAME -->
+
+        <div class="fg">
+
+            <label class="fl">
+
+                Full Name
+
+            </label>
+
+            <input type="text"
+                   th:field="*{name}"
+                   class="fi"
+                   id="name"
+                   minlength="3"
+                   maxlength="40"
+                   placeholder="e.g. Ravi Kumar"
+                   required/>
+
+            <div class="err" id="nameErr">
+                Name should contain at least 3 characters
+            </div>
+
+        </div>
+
+        <!-- EMAIL + PHONE -->
+
+        <div class="fr2">
+
+            <div class="fg">
+
+                <label class="fl">
+
+                    Email
+
+                </label>
+
+                <input type="email"
+                       th:field="*{email}"
+                       class="fi"
+                       id="email"
+                       placeholder="you@email.com"
+                       required/>
+
+            </div>
+
+            <div class="fg">
+
+                <label class="fl">
+
+                    Phone
+
+                </label>
+
+                <input type="tel"
+                       th:field="*{phone}"
+                       class="fi"
+                       id="phone"
+                       pattern="[0-9]{10}"
+                       maxlength="10"
+                       placeholder="9876543210"
+                       required/>
+
+                <div class="err" id="phoneErr">
+                    Enter valid 10 digit phone number
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- AGE + PASSWORD -->
+
+        <div class="fr2">
+
+            <div class="fg">
+
+                <label class="fl">
+
+                    Age
+
+                </label>
+
+                <input type="number"
+                       class="fi"
+                       id="age"
+                       min="16"
+                       max="100"
+                       placeholder="Minimum 16"
+                       required/>
+
+                <div class="err" id="ageErr">
+                    Age should be 16 or above
+                </div>
+
+            </div>
+
+            <div class="fg">
+
+                <label class="fl">
+
+                    Password
+
+                </label>
+
+                <div class="pw-wrap">
+
+                    <input type="password"
+                           th:field="*{password}"
+                           id="pwdField"
+                           class="fi"
+                           minlength="8"
+                           placeholder="Minimum 8 characters"
+                           required
+                           oninput="checkPwd(this.value)"/>
+
+                    <button type="button"
+                            class="pw-eye"
+                            onclick="togglePwd()">
+
+                        👁
+
+                    </button>
+
+                </div>
+
+                <div class="strength-bar">
+
+                    <div class="strength-fill"
+                         id="sf">
+                    </div>
+
+                </div>
+
+                <div class="strength-hint"
+                     id="sh">
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- CONFIRM PASSWORD -->
+
+        <div class="fg">
+
+            <label class="fl">
+
+                Confirm Password
+
+            </label>
+
+            <input type="password"
+                   class="fi"
+                   id="confirmPwd"
+                   placeholder="Re-enter password"
+                   required/>
+
+            <div class="err" id="confirmErr">
+                Passwords do not match
+            </div>
+
+        </div>
+
+        <!-- ROLE -->
+
+        <div style="margin-bottom:8px">
+
+            <label class="fl">
+
+                I am a...
+
+            </label>
+
+        </div>
+
+        <div class="role-grid">
+
+            <th:block th:each="role,rs : ${roles}">
+
+                <input class="role-opt"
+                       type="radio"
+                       name="role"
+                       th:id="'r_'+${role}"
+                       th:value="${role}"
+                       th:checked="${rs.first}"/>
+
+                <label class="role-lbl"
+                       th:for="'r_'+${role}">
+
+          <span th:text="${role}">
+          </span>
+
+                </label>
+
+            </th:block>
+
+        </div>
+
+        <!-- SUBMIT -->
+
+        <button type="submit"
+                class="bsub">
+
+            Create Account →
+
+        </button>
+
+    </form>
+
+    <div class="login-row">
+
+        Already have an account?
+
+        <a th:href="@{/}">
+
+            Sign in
+
+        </a>
+
+    </div>
+
+</div>
+
+<script>
+
+    function checkPwd(v){
+
+    const sf=document.getElementById('sf'),
+          sh=document.getElementById('sh');
+
+    let s=0;
+
+    if(v.length>=8)s++;
+    if(/[A-Z]/.test(v))s++;
+    if(/[0-9]/.test(v))s++;
+    if(/[^A-Za-z0-9]/.test(v))s++;
+
+    const lvl=[
+
+    {w:'0%',c:'#e2e8f0',l:''},
+    {w:'25%',c:'#ef4444',l:'Weak'},
+    {w:'50%',c:'#f59e0b',l:'Fair'},
+    {w:'75%',c:'#6366f1',l:'Good'},
+    {w:'100%',c:'#10b981',l:'Strong ✓'}
+
+    ][s];
+
+    sf.style.width=lvl.w;
+    sf.style.background=lvl.c;
+
+    sh.textContent=lvl.l;
+    sh.style.color=lvl.c;
+    }
+
+    function togglePwd(){
+
+    const f=document.getElementById('pwdField');
+
+    f.type=
+    f.type==='password'
+    ?'text'
+    :'password';
+    }
+
+    function validateForm(){
+
+    let valid=true;
+
+    const age=
+    parseInt(
+    document.getElementById('age').value
+    );
+
+    const pwd=
+    document.getElementById('pwdField').value;
+
+    const cpwd=
+    document.getElementById('confirmPwd').value;
+
+    const phone=
+    document.getElementById('phone').value;
+
+    const name=
+    document.getElementById('name').value;
+
+    document.querySelectorAll('.err')
+    .forEach(e=>e.style.display='none');
+
+    /* NAME */
+
+    if(name.trim().length < 3){
+
+    document.getElementById('nameErr')
+    .style.display='block';
+
+    valid=false;
+    }
+
+    /* AGE */
+
+    if(age < 16){
+
+    document.getElementById('ageErr')
+    .style.display='block';
+
+    valid=false;
+    }
+
+    /* PHONE */
+
+    if(!/^[0-9]{10}$/.test(phone)){
+
+    document.getElementById('phoneErr')
+    .style.display='block';
+
+    valid=false;
+    }
+
+    /* PASSWORD MATCH */
+
+    if(pwd !== cpwd){
+
+    document.getElementById('confirmErr')
+    .style.display='block';
+
+    valid=false;
+    }
+
+    return valid;
+    }
+
+</script>
+
+</body>
+</html>
